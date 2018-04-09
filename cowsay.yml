@@ -1,6 +1,7 @@
-  hosts: all
-  tasks:
-    - name: Install Cowsay
-      yum:
-        name: cowsay
-        state: latest
+  - name: Cowsay Install
+    hosts: all
+    tasks:
+      - name: Install Cowsay
+        yum:
+          name: cowsay
+          state: latest
