@@ -1,4 +1,4 @@
-  - name: Cowsay Install
+  - name: Install Cowsay
     hosts: all
     tasks:
       - name: Install Cowsay
