@@ -47,6 +47,48 @@
         group: "{{ index_group }}"
         mode: '0644'
 
+    - name: Get instance metadata for security group configuration
+      ansible.builtin.uri:
+        url: http://169.254.169.254/latest/meta-data/instance-id
+        method: GET
+        timeout: 5
+      register: instance_id_result
+      ignore_errors: true
+      delegate_to: localhost
+      run_once: true
+
+    - name: Get security groups for the instance
+      amazon.aws.ec2_instance_info:
+        instance_ids:
+          - "{{ instance_id_result.content }}"
+      register: instance_info
+      delegate_to: localhost
+      run_once: true
+      when: instance_id_result.content is defined
+
+    - name: Ensure HTTP access in security group
+      amazon.aws.ec2_group:
+        name: "{{ item.security_groups[0].group_name }}"
+        description: "Security group for web server"
+        rules:
+          - proto: tcp
+            ports:
+              - 22
+            cidr_ip: 0.0.0.0/0
+            rule_desc: SSH access
+          - proto: tcp
+            ports:
+              - 80
+            cidr_ip: 0.0.0.0/0
+            rule_desc: HTTP access for nginx
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      loop: "{{ instance_info.instances }}"
+      delegate_to: localhost
+      run_once: true
+      when: instance_info.instances is defined
+
     - name: Gather public IP address from AWS metadata
       ansible.builtin.uri:
         url: http://169.254.169.254/latest/meta-data/public-ipv4
