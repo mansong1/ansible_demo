@@ -10,6 +10,19 @@
     index_group: "{{ 'www-data' if ansible_os_family == 'Debian' else 'nginx' }}"
 
   tasks:
+    - name: Update all packages (RedHat-based)
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+        update_cache: true
+      when: ansible_os_family == "RedHat"
+
+    - name: Update all packages (Debian-based)
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
     - name: Install nginx (Debian-based)
       ansible.builtin.apt:
         name: nginx
