@@ -1,0 +1,46 @@
+---
+- name: Deploy Webserver
+  hosts: webservers
+  become: true
+  gather_facts: true
+  vars:
+    app_version: "default"
+    index_path: "{{ '/var/www/html/index.html' if ansible_os_family == 'Debian' else '/usr/share/nginx/html/index.html' }}"
+    index_owner: "{{ 'www-data' if ansible_os_family == 'Debian' else 'nginx' }}"
+    index_group: "{{ 'www-data' if ansible_os_family == 'Debian' else 'nginx' }}"
+
+  tasks:
+    - name: Install nginx (Debian-based)
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install nginx (RedHat-based)
+      ansible.builtin.yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Create index.html with app version
+      ansible.builtin.copy:
+        dest: "{{ index_path }}"
+        content: "My version is {{ app_version }}\n"
+        owner: "{{ index_owner }}"
+        group: "{{ index_group }}"
+        mode: '0644'
+
+    - name: Gather IP address of the host
+      ansible.builtin.set_fact:
+        nginx_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: Display URL to access nginx
+      ansible.builtin.debug:
+        msg: "Nginx is running! Access it at: http://{{ nginx_ip }}"
