@@ -34,17 +34,51 @@
       ansible.builtin.shell: amazon-linux-extras install epel -y
       when: ansible_distribution == "Amazon"
 
+    - name: Install nginx (Amazon Linux)
+      ansible.builtin.shell: amazon-linux-extras install nginx1 -y
+      when: ansible_distribution == "Amazon"
+
     - name: Install EPEL repository (RedHat/CentOS)
       ansible.builtin.yum:
         name: epel-release
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
-    - name: Install nginx (RedHat-based)
+    - name: Install nginx (RedHat/CentOS)
       ansible.builtin.yum:
         name: nginx
         state: present
-      when: ansible_os_family == "RedHat"
+      when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+
+    - name: Verify nginx installation and location
+      ansible.builtin.shell: |
+        echo "=== Nginx Installation Verification ==="
+        if command -v nginx >/dev/null 2>&1; then
+          echo "✓ nginx found in PATH: $(which nginx)"
+          echo "✓ nginx version: $(nginx -v 2>&1)"
+        else
+          echo "✗ nginx not found in PATH"
+        fi
+        
+        echo "=== Searching for nginx binary ==="
+        find /usr -name "nginx" -type f 2>/dev/null || echo "No nginx binary found in /usr"
+        
+        echo "=== Checking nginx package ==="
+        if [ -f /etc/redhat-release ]; then
+          rpm -qa | grep nginx || echo "No nginx package found"
+        elif [ -f /etc/debian_version ]; then
+          dpkg -l | grep nginx || echo "No nginx package found"
+        fi
+        
+        echo "=== Checking nginx service ==="
+        systemctl status nginx.service || echo "nginx service not found/running"
+      register: nginx_verification
+      ignore_errors: true
+
+    - name: Display nginx verification results
+      ansible.builtin.debug:
+        msg: "{{ nginx_verification.stdout_lines }}"
+      when: nginx_verification.stdout_lines is defined
 
     - name: Ensure nginx is running
       ansible.builtin.service:
