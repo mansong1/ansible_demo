@@ -177,8 +177,6 @@
         timeout: 5
       register: instance_id_result
       ignore_errors: true
-      delegate_to: localhost
-      run_once: true
 
     - name: Get security groups for the instance
       amazon.aws.ec2_instance_info:
@@ -186,8 +184,7 @@
           - "{{ instance_id_result.content }}"
       register: instance_info
       delegate_to: localhost
-      run_once: true
-      when: instance_id_result.content is defined
+      when: instance_id_result.content is defined and instance_id_result.content != ""
 
     - name: Ensure HTTP access in security group
       amazon.aws.ec2_group:
@@ -209,8 +206,7 @@
             cidr_ip: 0.0.0.0/0
       loop: "{{ instance_info.instances }}"
       delegate_to: localhost
-      run_once: true
-      when: instance_info.instances is defined
+      when: instance_info.instances is defined and instance_info.instances | length > 0
 
     - name: Gather public IP address from AWS metadata
       ansible.builtin.uri:
