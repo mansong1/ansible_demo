@@ -89,7 +89,83 @@
     - name: Create index.html with app version
       ansible.builtin.copy:
         dest: "{{ index_path }}"
-        content: "My version is {{ app_version }}\n"
+        content: |
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Web Server - Version {{ app_version }}</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      margin: 0;
+                      padding: 0;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 100vh;
+                  }
+                  .container {
+                      text-align: center;
+                      background: rgba(255, 255, 255, 0.1);
+                      padding: 2rem;
+                      border-radius: 15px;
+                      backdrop-filter: blur(10px);
+                      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+                      border: 1px solid rgba(255, 255, 255, 0.18);
+                  }
+                  h1 {
+                      font-size: 3rem;
+                      margin: 0 0 1rem 0;
+                      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                  }
+                  .version {
+                      font-size: 4rem;
+                      font-weight: bold;
+                      color: #ffeb3b;
+                      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+                      background: rgba(255, 235, 59, 0.2);
+                      padding: 1rem 2rem;
+                      border-radius: 10px;
+                      margin: 1rem 0;
+                      border: 3px solid #ffeb3b;
+                      animation: pulse 2s infinite;
+                  }
+                  @keyframes pulse {
+                      0% { transform: scale(1); }
+                      50% { transform: scale(1.05); }
+                      100% { transform: scale(1); }
+                  }
+                  .info {
+                      font-size: 1.2rem;
+                      margin-top: 2rem;
+                      opacity: 0.9;
+                  }
+                  .timestamp {
+                      font-size: 0.9rem;
+                      margin-top: 1rem;
+                      opacity: 0.7;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 Web Server Deployed</h1>
+                  <div class="version">VERSION: {{ app_version | upper }}</div>
+                  <div class="info">
+                      ✅ Nginx is running successfully<br>
+                      🏠 Host: {{ ansible_hostname | default('Unknown') }}<br>
+                      🌐 OS: {{ ansible_distribution | default('Unknown') }} {{ ansible_distribution_version | default('') }}
+                  </div>
+                  <div class="timestamp">
+                      📅 Deployed: {{ ansible_date_time.iso8601 | default('Unknown') }}
+                  </div>
+              </div>
+          </body>
+          </html>
         owner: "{{ index_owner }}"
         group: "{{ index_group }}"
         mode: '0644'
