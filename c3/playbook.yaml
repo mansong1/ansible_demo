@@ -47,13 +47,22 @@
         group: "{{ index_group }}"
         mode: '0644'
 
-    - name: Gather IP address of the host
+    - name: Gather public IP address from AWS metadata
+      ansible.builtin.uri:
+        url: http://169.254.169.254/latest/meta-data/public-ipv4
+        method: GET
+        timeout: 5
+      register: public_ip_result
+      ignore_errors: true
+
+    - name: Set nginx IP (prefer public, fallback to private)
       ansible.builtin.set_fact:
-        nginx_ip: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) | default('localhost') }}"
+        nginx_ip: "{{ public_ip_result.content | default(ansible_default_ipv4.address) | default(ansible_all_ipv4_addresses[0]) | default('localhost') }}"
 
     - name: Debug network information
       ansible.builtin.debug:
         msg: 
+          - "Public IPv4: {{ public_ip_result.content | default('Not available') }}"
           - "Default IPv4: {{ ansible_default_ipv4.address | default('Not available') }}"
           - "All IPv4 addresses: {{ ansible_all_ipv4_addresses | default([]) }}"
           - "Selected IP: {{ nginx_ip }}"
