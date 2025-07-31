@@ -17,6 +17,12 @@
         update_cache: true
       when: ansible_os_family == "Debian"
 
+    - name: Install EPEL repository (RedHat-based)
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+      when: ansible_os_family == "RedHat"
+
     - name: Install nginx (RedHat-based)
       ansible.builtin.yum:
         name: nginx
