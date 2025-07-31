@@ -49,7 +49,14 @@
 
     - name: Gather IP address of the host
       ansible.builtin.set_fact:
-        nginx_ip: "{{ ansible_default_ipv4.address }}"
+        nginx_ip: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) | default('localhost') }}"
+
+    - name: Debug network information
+      ansible.builtin.debug:
+        msg: 
+          - "Default IPv4: {{ ansible_default_ipv4.address | default('Not available') }}"
+          - "All IPv4 addresses: {{ ansible_all_ipv4_addresses | default([]) }}"
+          - "Selected IP: {{ nginx_ip }}"
 
     - name: Display URL to access nginx
       ansible.builtin.debug:
