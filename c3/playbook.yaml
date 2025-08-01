@@ -5,6 +5,7 @@
   gather_facts: true
   vars:
     app_version: "default"
+    component_name: "WebServer-C3"
     index_path: "{{ '/var/www/html/index.html' if ansible_os_family == 'Debian' else '/usr/share/nginx/html/index.html' }}"
     index_owner: "{{ 'www-data' if ansible_os_family == 'Debian' else 'nginx' }}"
     index_group: "{{ 'www-data' if ansible_os_family == 'Debian' else 'nginx' }}"
@@ -95,7 +96,7 @@
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Web Server - Version {{ app_version }}</title>
+              <title>{{ component_name }} - Version {{ app_version }}</title>
               <style>
                   body {
                       font-family: Arial, sans-serif;
@@ -121,6 +122,17 @@
                       font-size: 3rem;
                       margin: 0 0 1rem 0;
                       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                  }
+                  .component {
+                      font-size: 1.8rem;
+                      font-weight: bold;
+                      color: #4fc3f7;
+                      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+                      background: rgba(79, 195, 247, 0.2);
+                      padding: 0.5rem 1rem;
+                      border-radius: 8px;
+                      margin: 1rem 0;
+                      border: 2px solid #4fc3f7;
                   }
                   .version {
                       font-size: 4rem;
@@ -154,6 +166,7 @@
           <body>
               <div class="container">
                   <h1>🚀 Web Server Deployed</h1>
+                  <div class="component">{{ component_name }}</div>
                   <div class="version">VERSION: {{ app_version | upper }}</div>
                   <div class="info">
                       ✅ Nginx is running successfully<br>
