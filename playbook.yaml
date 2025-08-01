@@ -6,4 +6,4 @@
 
    - name: Print message
      ansible.builtin.debug:
-       msg: {{ my_message }}
+       msg: "{{ my_message }}"
