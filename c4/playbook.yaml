@@ -1,0 +1,11 @@
+---
+- name: Simple Hello World Playbook
+  hosts: webservers
+  tasks:
+    - name: Echo hello world
+      command: echo "hello world"
+      register: hello_output
+    
+    - name: Display the output
+      debug:
+        msg: "{{ hello_output.stdout }}"
