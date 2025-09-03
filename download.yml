@@ -1,0 +1,28 @@
+# file: stocktrack_download.yml
+- name: Download StockTrack jar
+  hosts: all
+  become: true
+  vars:
+    # No default on purpose; pass with -e "artifact_url=..."
+    artifact_url: "{{ artifact_url }}"
+
+  tasks:
+    - name: Ensure destination directory exists
+      file:
+        path: /opt/stocktrack
+        state: directory
+        mode: "0755"
+
+    - name: Download jar
+      get_url:
+        url: "{{ artifact_url }}"
+        dest: "/opt/stocktrack/{{ artifact_url | basename }}"
+        mode: "0644"
+        force: yes
+
+    - name: Symlink to latest
+      file:
+        src: "/opt/stocktrack/{{ artifact_url | basename }}"
+        dest: "/opt/stocktrack/stocktrack.jar"
+        state: link
+        force: true
