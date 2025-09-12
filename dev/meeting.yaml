@@ -1,0 +1,12 @@
+---
+- name: Dev Meeting
+  hosts: meetings
+  gather_facts: false
+  vars:
+    meeting_name: "Daily Standup"
+    environment: "dev"
+    meeting_time: "09:00 AM"
+  tasks:
+    - name: Print meeting info
+      ansible.builtin.debug:
+        msg: "{{ environment | upper }}: {{ meeting_name }} at {{ meeting_time }}"

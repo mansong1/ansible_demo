@@ -1,0 +1,12 @@
+---
+- name: Staging Meeting
+  hosts: meetings
+  gather_facts: false
+  vars:
+    meeting_name: "Sprint Review"
+    environment: "staging"
+    meeting_time: "02:00 PM"
+  tasks:
+    - name: Print meeting info
+      ansible.builtin.debug:
+        msg: "{{ environment | upper }}: {{ meeting_name }} at {{ meeting_time }}"

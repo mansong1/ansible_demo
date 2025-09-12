@@ -1,0 +1,12 @@
+---
+- name: Prod Meeting
+  hosts: meetings
+  gather_facts: false
+  vars:
+    meeting_name: "Executive Sync"
+    environment: "prod"
+    meeting_time: "04:30 PM"
+  tasks:
+    - name: Print meeting info
+      ansible.builtin.debug:
+        msg: "{{ environment | upper }}: {{ meeting_name }} at {{ meeting_time }}"
