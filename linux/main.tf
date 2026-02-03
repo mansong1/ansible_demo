@@ -13,6 +13,12 @@ data "aws_subnets" "default" {
   }
 }
 
+resource "tls_private_key" "ssh" {
+  count = (var.key_name == null && var.ssh_public_key == null && var.generate_ssh_key) ? 1 : 0
+
+  algorithm = "ED25519"
+}
+
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -54,14 +60,14 @@ resource "aws_security_group" "ssh" {
 }
 
 resource "aws_key_pair" "this" {
-  count = var.ssh_public_key != null ? 1 : 0
+  count = (var.key_name == null && (var.ssh_public_key != null || var.generate_ssh_key)) ? 1 : 0
 
-  key_name   = coalesce(var.key_name, "${var.name}-key")
-  public_key = var.ssh_public_key
+  key_name   = "${var.name}-key"
+  public_key = var.ssh_public_key != null ? var.ssh_public_key : tls_private_key.ssh[0].public_key_openssh
 }
 
 locals {
-  effective_key_name = var.ssh_public_key != null ? aws_key_pair.this[0].key_name : var.key_name
+  effective_key_name = var.key_name != null ? var.key_name : aws_key_pair.this[0].key_name
 }
 
 resource "aws_instance" "linux" {
@@ -71,6 +77,13 @@ resource "aws_instance" "linux" {
   vpc_security_group_ids      = [aws_security_group.ssh.id]
   associate_public_ip_address = true
   key_name                    = local.effective_key_name
+
+  lifecycle {
+    precondition {
+      condition     = local.effective_key_name != null
+      error_message = "No SSH key configured. Set key_name, or set ssh_public_key, or enable generate_ssh_key."
+    }
+  }
 
   tags = {
     Name = var.name

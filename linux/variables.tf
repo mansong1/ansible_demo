@@ -23,12 +23,12 @@ variable "key_name" {
   default = null
 }
 
+variable "generate_ssh_key" {
+  type    = bool
+  default = true
+}
+
 variable "ssh_public_key" {
   type    = string
   default = null
-
-  validation {
-    condition     = var.key_name != null || var.ssh_public_key != null
-    error_message = "Set either key_name (existing EC2 key pair) or ssh_public_key (to create a key pair)."
-  }
 }
